@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ScriptExport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.kaseya.com/vsa/2008/12/Scripting">
+  <Procedure name="Todyl Agent Deployment - Updated 20201015" treePres="3" id="1198528558" folderId="653849818768845" treeFullPath="myProcedures - jwarner@qcfix.com">
+    <Body description="">
+      <If description="Todyl Agent Deployment Procedure&#xD;&#xA;version 20201015 Updated October 15, 2020&#xD;&#xA;by Jonathan Warner; Warner Computer Services&#xD;&#xA;Please inspect code for suitability and test before using in production &#xD;&#xA;THIS IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED&#xD;&#xA;Before running this procedure define a TODYL_ACCT_KEY variable&#xD;&#xA;set the TODYL_ACCT_KEY variable to your Todyl Distribution key&#xD;&#xA;Your account key can be found in Todyl console &gt; Deployment &gt; Windows Install Script (deploykey variable)">
+        <Condition name="CheckVariable">
+          <Parameter xsi:type="StringParameter" name="VariableName" value="&lt;TODYL_ACCT_KEY&gt;" />
+          <Parameter xsi:type="EnumParameter" name="Condition" value="NotEquals" />
+          <Parameter xsi:type="StringParameter" name="Value" value="" />
+        </Condition>
+        <Then>
+          <If description="">
+            <Condition name="TestRegistryKey">
+              <Parameter xsi:type="StringParameter" name="Path" value="HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SGN Connect" />
+              <Parameter xsi:type="EnumParameter" name="Condition" value="NotExists" />
+            </Condition>
+            <Then>
+              <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                <Parameter xsi:type="StringParameter" name="Comment" value="Todyl SGN Connect service not found, installing..." />
+              </Statement>
+              <Statement name="GetURL" continueOnFail="false" osType="Windows">
+                <Parameter xsi:type="StringParameter" name="URL" value="https://s3.amazonaws.com/prd.download.todyl.com/sgn-connect/SGNConnect_Latest.exe" />
+                <Parameter xsi:type="StringParameter" name="ResponseFileName" value="#vagentconfiguration.agenttempdir#\SGNConnect_Latest.exe" />
+                <Parameter xsi:type="BooleanParameter" name="WaitComplete" value="True" />
+              </Statement>
+              <If description="">
+                <Condition name="TestFile">
+                  <Parameter xsi:type="StringParameter" name="Path" value="#vagentconfiguration.agenttempdir#\SGNConnect_Latest.exe" />
+                  <Parameter xsi:type="EnumParameter" name="Condition" value="Exists" />
+                  <Parameter xsi:type="StringParameter" name="Value" value="" />
+                </Condition>
+                <Then>
+                  <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                    <Parameter xsi:type="StringParameter" name="Comment" value="SGNConnect_Latest.exe written to disk" />
+                  </Statement>
+                  <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                    <Parameter xsi:type="StringParameter" name="Comment" value="Running: &quot;#vagentconfiguration.agenttempdir#\SGNConnect_Latest.exe&quot; /deployKey &lt;TODYL_ACCT_KEY&gt;" />
+                  </Statement>
+                  <If description="">
+                    <Condition name="TestFile">
+                      <Parameter xsi:type="StringParameter" name="Path" value="#vagentconfiguration.agenttempdir#\SGNConnect_Latest.exe" />
+                      <Parameter xsi:type="EnumParameter" name="Condition" value="Exists" />
+                      <Parameter xsi:type="StringParameter" name="Value" value="" />
+                    </Condition>
+                    <Then>
+                      <Statement name="ExecuteFile" continueOnFail="false" osType="Windows">
+                        <Parameter xsi:type="StringParameter" name="Path" value="#vagentconfiguration.agenttempdir#\SGNConnect_Latest.exe" />
+                        <Parameter xsi:type="StringParameter" name="Arguments" value="/deployKey &lt;TODYL_ACCT_KEY&gt;" />
+                        <Parameter xsi:type="EnumParameter" name="ExecuteAccount" value="System" />
+                        <Parameter xsi:type="BooleanParameter" name="WaitComplete" value="True" />
+                      </Statement>
+                      <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                        <Parameter xsi:type="StringParameter" name="Comment" value="Installation complete, verifying..." />
+                      </Statement>
+                      <If description="">
+                        <Condition name="TestRegistryKey">
+                          <Parameter xsi:type="StringParameter" name="Path" value="HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\SGN Connect" />
+                          <Parameter xsi:type="EnumParameter" name="Condition" value="Exists" />
+                        </Condition>
+                        <Then>
+                          <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                            <Parameter xsi:type="StringParameter" name="Comment" value="Todyl agent installed successfully!" />
+                          </Statement>
+                          <Statement name="ExecuteFile" continueOnFail="false" osType="Windows">
+                            <Parameter xsi:type="StringParameter" name="Path" value="C:\Program Files\SGN Connect\current\sgnconnect.exe" />
+                            <Parameter xsi:type="StringParameter" name="Arguments" value="" />
+                            <Parameter xsi:type="EnumParameter" name="ExecuteAccount" value="User" />
+                            <Parameter xsi:type="BooleanParameter" name="WaitComplete" value="False" />
+                          </Statement>
+                          <If description="">
+                            <Condition name="TestFile">
+                              <Parameter xsi:type="StringParameter" name="Path" value="C:\Users\Public\Desktop\SGN Connect.lnk" />
+                              <Parameter xsi:type="EnumParameter" name="Condition" value="Exists" />
+                              <Parameter xsi:type="StringParameter" name="Value" value="" />
+                            </Condition>
+                            <Then>
+                              <Statement name="DeleteFile" continueOnFail="true" osType="Windows">
+                                <Parameter xsi:type="StringParameter" name="Path" value="C:\Users\Public\Desktop\SGN Connect.lnk" />
+                              </Statement>
+                              <Statement name="WriteScriptLogEntry" continueOnFail="true" osType="Windows">
+                                <Parameter xsi:type="StringParameter" name="Comment" value="Todyl Public Desktop Shortcut Removed" />
+                              </Statement>
+                            </Then>
+                          </If>
+                        </Then>
+                        <Else>
+                          <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                            <Parameter xsi:type="StringParameter" name="Comment" value="Error: Install completed but unable to detect presence of Todyl Agent service." />
+                          </Statement>
+                        </Else>
+                      </If>
+                    </Then>
+                    <Else>
+                      <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                        <Parameter xsi:type="StringParameter" name="Comment" value="Error: &quot;#vagentconfiguration.agenttempdir#\SGNConnect_Latest.exe&quot; did not exist" />
+                      </Statement>
+                    </Else>
+                  </If>
+                </Then>
+                <Else>
+                  <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                    <Parameter xsi:type="StringParameter" name="Comment" value="Error: Unable to download SGNConnect_Latest.exe" />
+                  </Statement>
+                </Else>
+              </If>
+            </Then>
+            <Else>
+              <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+                <Parameter xsi:type="StringParameter" name="Comment" value="The Todyl agent is already installed." />
+              </Statement>
+            </Else>
+          </If>
+        </Then>
+        <Else>
+          <Statement name="WriteScriptLogEntry" continueOnFail="false" osType="Windows">
+            <Parameter xsi:type="StringParameter" name="Comment" value="Error: TODYL_ACCT_KEY Not defined!" />
+          </Statement>
+        </Else>
+      </If>
+    </Body>
+  </Procedure>
+</ScriptExport>
