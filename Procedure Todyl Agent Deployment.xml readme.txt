@@ -1,0 +1,15 @@
+README Procedure Todyl Agent Deployment.xml
+
+Kaseya VSA Todyl Deployment Script
+I've created the following script to deploy Todyl via a Kaseya VSA procedure.
+
+Procedure Notes:
+In addition to installing the agent, it also launches it for the first time and deletes the desktop shortcut.
+
+Prerequisites:
+1) Kaseya variable named TODYL_ACCT_KEY (Agent Procedures > Manage Procedures > Schedule / Create > Manage Variables)
+2) Enter the Todyl deploy key from the respective Todyl Tenant (Todyl Dashboard > Devices and Deployment > Deployment > Windows Install Script > Deploy Key) into the TODYL_ACCT_KEY Kaseya variable and apply it to the groups matching the Todyl tenant (Manage Variables > Select Variable > Copy into Set Variable > Check the Tenant Site Groups to apply it toward > Click Apply).
+
+Import Notes:
+Copy and paste the procedure below into a text editor, save as Todyl-Agent-Deployment.xml
+Import into Kaseya: Agent Procedures > Schedule / Create > Click on myProcedures > Import Folder/Procedure 
